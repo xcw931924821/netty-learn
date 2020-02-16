@@ -1,5 +1,3 @@
-
-
 如果超过读的缓冲区1024怎么办呢？
 // 创建读取的缓冲区
 ByteBuffer buffer = ByteBuffer.allocate(1024);
