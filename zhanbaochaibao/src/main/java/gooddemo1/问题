@@ -1,0 +1,22 @@
+  1 server 设置最大长度只有10
+  结果：\n的之前的数据长度有17 就会报错 frame length (17) exceeds the allowed maximum (10)
+  ByteToMessageDecoder.channelRead
+
+  2 如果server配置长度为1024，但是传递的一个数据有\n之后的数据
+   一个请求里面\n后面还有数据，但是服务器接收到的数据是没有这个\\n的值
+  req = ("QUER TIME ORDER 1111" + "\n我的爱你们的").getBytes();
+  服务器只会取QUER TIME ORDER 1111 这个字符。
+  req = ("QUER TIME ORDER 1111" + "\n我的\n").getBytes();
+  也是一个包发过去，在服务器那边做的拆分数据，底层会根据分隔符号:
+  调用handder 的channelRead多次；
+
+ 3  ctx.writeAndFlush(buffer);，多个请求是几个数据包过去的
+
+  writeAndFlush 如果发送的数据有多个换行符号，则是多个请求
+        buffer.writeBytes(req1);
+        buffer.writeBytes(req2);
+        buffer.writeBytes(req3_1);//一个分隔符号一个请求，这里会有2个请求过去
+        ctx.writeAndFlush(buffer);
+
+  //只是一个请求过去了，但是服务端 会根据分隔符号来做拆分。底层调用的channelRead多次
+

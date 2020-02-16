@@ -13,7 +13,7 @@ import java.util.Date;
  * @author Joanna.Yan
  * @date 2017年11月8日下午6:54:35
  */
-public class TimeServerHandler1 extends ChannelInboundHandlerAdapter{
+public class TimeServerGoodfHandler1 extends ChannelInboundHandlerAdapter{
 
     /**
      * 读取消息的次数
@@ -42,7 +42,7 @@ public class TimeServerHandler1 extends ChannelInboundHandlerAdapter{
 //        ctx.write(resp);
 
         String body = (String) msg;
-        System.out.println("The time server receive order : "+body+" ;the counter is : "+ ++counter);
+        System.out.println("The time server receive client data : "+body+" ;the counter is : "+ ++counter);
         String currentTime="QUERY TIME ORDER".equalsIgnoreCase(body) ? new
                 Date(System.currentTimeMillis()).toString() : "BAD ORDER";
         currentTime    = currentTime + System.getProperty("line.separator");
@@ -55,6 +55,7 @@ public class TimeServerHandler1 extends ChannelInboundHandlerAdapter{
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
+        cause.printStackTrace();
         ctx.close();
     }
 }

@@ -60,17 +60,18 @@ public class TimeServerGood {
         }
     }
 
+    //10长度没数据
     private class ChildChannelHandler extends ChannelInitializer<SocketChannel> {
 
         @Override
         protected void initChannel(SocketChannel arg0) throws Exception {
 //            arg0.pipeline().addLast(new TimeServerHandler());
             //解码读取过来的字节数
-            arg0.pipeline().addLast(new LineBasedFrameDecoder(1024));
+            arg0.pipeline().addLast(new LineBasedFrameDecoder(1024));//1024个字节
             arg0.pipeline().addLast(new StringDecoder());
 
             //模拟粘包/拆包故障场景
-            arg0.pipeline().addLast(new TimeServerHandler1());
+            arg0.pipeline().addLast(new TimeServerGoodfHandler1());
         }
     }
 

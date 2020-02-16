@@ -10,12 +10,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
  * 1问题1 发出去的字节数0**-+-超过了LineBasedFrameDecoder的长度怎么办
  */
-public class TimeClientGood {
+public class TimeClientGoodByteBufMultiData {
     public static void main(String[] args) throws Exception {
         int port = 9091;
         if(args!=null&&args.length>0){
@@ -25,7 +26,8 @@ public class TimeClientGood {
                 // 采用默认值
             }
         }
-        new TimeClientGood().connect(port, "127.0.0.1");
+        new TimeClientGoodByteBufMultiData().connect(port, "127.0.0.1");
+
     }
 
     public void connect(int port,String host) throws Exception{
@@ -46,7 +48,7 @@ public class TimeClientGood {
                             ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
                             ch.pipeline().addLast(new StringDecoder());
                             //模拟粘包/拆包故障场景
-                            ch.pipeline().addLast(new TimeClientHandler1());
+                            ch.pipeline().addLast(new LocalTimeClientHandler1());
                         }
                     });
             //发起异步连接操作
@@ -62,38 +64,45 @@ public class TimeClientGood {
     /**
      * 模拟粘包/拆包故障场景
      */
-    static class TimeClientHandler1 extends ChannelInboundHandlerAdapter {
+    static class LocalTimeClientHandler1 extends ChannelInboundHandlerAdapter {
 
         private static final Logger logger = Logger.getLogger("TimeClientHandler1");
         private int counter;
         private byte[] req;
 
         //1 /
-        public TimeClientHandler1() {
+        public LocalTimeClientHandler1() {
             //有换行符号是变成了2个请求吗，不是的还是1个请求，只是
-            //QUERY TIME ORDER" + "\n123 服务器会抛弃掉123的字符、
-            //req = ("QUERY TIME ORDER" + "\n123").getBytes();
-            req = ("QUERY TIME ORDER" + "\n我的\n").getBytes();
+           // req = ("QUERY TIME ORDER" + "\n3626").getBytes();
         }
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        ByteBuf message=null;
-//        for (int i = 0; i < 100; i++) {
-//            message = Unpooled.buffer(req.length);
-//            message.writeBytes(req);
-//            ctx.writeAndFlush(message);
-//        }
-            System.out.println("channelActive start");
-            ByteBuf messageByteBuf = null;
-            for (int i = 0; i < 1; i++) {
-                messageByteBuf = Unpooled.buffer(req.length);
-                messageByteBuf.writeBytes(req);
-                ctx.writeAndFlush(messageByteBuf);
-                System.out.println("send start:"+i);
-            }
-        }
+            System.out.println("channelActive start111");
 
+            for(int j = 0;j<20;j++){
+                System.out.println("startdataa");
+                byte[] req1 = ("hello1" + System.getProperty("line.separator")).getBytes();
+                byte[] req2 = ("hello2" + System.getProperty("line.separator")).getBytes();
+                byte[] req3_1 = ("hello3").getBytes();
+                byte[] req3_2 = (System.getProperty("line.separator")).getBytes();
+                ByteBuf buffer = Unpooled.buffer();
+                buffer.writeBytes(req1);
+                buffer.writeBytes(req2);
+                buffer.writeBytes(req3_1);//一个分隔符号一个请求，这里会有2个请求过去
+                ctx.writeAndFlush(buffer);
+                //第3个的第2部分数据搞过去，拆包问题
+//                try {
+//                    TimeUnit.SECONDS.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+            }
+
+//            buffer = Unpooled.buffer();
+//            buffer.writeBytes(req3_2);
+//            ctx.writeAndFlush(buffer);
+        }
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg)
                 throws Exception {

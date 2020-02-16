@@ -8,6 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 
 public class TimeServer {
     public static void main(String[] args) throws Exception {
@@ -60,10 +61,11 @@ public class TimeServer {
 
     private class ChildChannelHandler extends ChannelInitializer<SocketChannel> {
 
+        //如果字节数小于这个最大值就丢弃读
         @Override
         protected void initChannel(SocketChannel arg0) throws Exception {
 //            arg0.pipeline().addLast(new TimeServerHandler());
-
+            arg0.pipeline().addLast(new LineBasedFrameDecoder(1024,true,true));
             //模拟粘包/拆包故障场景
             arg0.pipeline().addLast(new TimeServerHandler1());
         }
