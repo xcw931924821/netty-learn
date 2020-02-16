@@ -1,4 +1,4 @@
-package gooddemo1.server;
+package LineBasedFrameDecoderDemo.server;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
