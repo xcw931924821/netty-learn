@@ -31,6 +31,7 @@ public class NIOServer {
 		ServerSocketChannel serverChannel = ServerSocketChannel.open();
 		// 设置通道为非阻塞,设置true的话，就报错
 		serverChannel.configureBlocking(false);
+		System.out.println("dddd");
 
 
 		// 将该通道对应的ServerSocket绑定到port端口
