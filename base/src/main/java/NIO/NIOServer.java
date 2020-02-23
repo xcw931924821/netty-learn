@@ -30,6 +30,7 @@ public class NIOServer {
 		//餐厅大门，类似bio ServerSocket
 		ServerSocketChannel serverChannel = ServerSocketChannel.open();
 		// 设置通道为非阻塞,设置true的话，就报错
+        System.out.println("2222");
 		serverChannel.configureBlocking(false);
 		System.out.println("dddd");
 
